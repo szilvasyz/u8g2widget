@@ -22,6 +22,18 @@ class u8g2widget {
 };
 
 
+class u8g2widgetFrame : public u8g2widget {       
+  using u8g2widget::u8g2widget;    
+  protected:   
+    int thickness = 1; 
+
+  public:
+    u8g2widgetFrame(int x, int y, int w, int h, int t);
+//    virtual void update();
+    virtual void show(U8G2 *u);
+};
+
+
 class u8g2widgetText : public u8g2widget {       
   protected:   
     const uint8_t *font = nullptr;

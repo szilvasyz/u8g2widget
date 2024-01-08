@@ -13,11 +13,38 @@ void u8g2widget::setVal() {}
 void u8g2widget::update() {}
 
 void u8g2widget::show(U8G2 *u) {
-  if (u8g2widgetDrawFrame) u->drawFrame(posx, posy, width, height);
+  if (u8g2widgetDrawFrame) {
+    u->drawFrame(
+      posx + (width < 0 ? width : 0),
+      posy + (height < 0 ? height : 0), 
+      width < 0 ? -width : width,
+      height < 0 ? -height : height
+    );
+  }
 }
 
 void u8g2widget::setPos(int x, int y) {
   posx = x; posy = y;
+}
+
+u8g2widgetFrame::u8g2widgetFrame(int x, int y, int w, int h, int t):
+  u8g2widget(x, y, w, h), thickness(t) {}
+
+void u8g2widgetFrame::show(U8G2 *u) {
+  int x = posx;
+  int y = posy;
+  int w = width;
+  int h = height;
+  int t = thickness;
+
+  if (w < 0) { x += w; w = -w; }
+  if (h < 0) { y += h; h = -h; }
+  
+  while (t && w && h) {
+    u->drawFrame(x++, y++, w, h);
+    w -= 2; h -= 2; t--;
+  }
+  u8g2widget::show(u);
 }
 
 
@@ -208,7 +235,8 @@ void u8g2widgetHDiscGauge::show(U8G2 *u) {
 
   u->setClipWindow(posx, posy, posx + width, posy + height);
   if (font) u->setFont(font);
-  
+  u->drawVLine(posx + width / 2, posy, height);
+
   px0 = x0 + (radius - 2) * cos(radians(r0 - value + 270));
   py0 = y0 - (mirror ? 2 - radius : radius - 2) * sin(radians(r0 - value + 270));
   
@@ -265,6 +293,7 @@ void u8g2widgetVDiscGauge::show(U8G2 *u) {
 
   u->setClipWindow(posx, posy, posx + width, posy + height);
   if (font) u->setFont(font);
+  u->drawHLine(posx, posy + height / 2, width);
   
   px0 = x0 + (mirror ? 2 - radius : radius - 2) * cos(radians(r0 - value));
   py0 = y0 - (radius - 2) * sin(radians(r0 - value));
